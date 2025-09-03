@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
     kotlin("plugin.jpa")
+    kotlin("kapt") // <-- ADDED KAPT PLUGIN
     id("io.gitlab.arturbosch.detekt")
 }
 
@@ -48,6 +49,10 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("net.logstash.logback:logstash-logback-encoder:7.4") // For structured JSON logging
+
+    implementation("org.springframework.boot:spring-boot-starter-actuator") // Micrometer is included here
+    implementation("io.micrometer:micrometer-registry-prometheus") // Prometheus registry
+    kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // Geospatial support
     implementation("org.hibernate.orm:hibernate-spatial:6.2.7.Final")

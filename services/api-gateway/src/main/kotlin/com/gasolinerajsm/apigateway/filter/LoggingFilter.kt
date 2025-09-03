@@ -49,16 +49,17 @@ class LoggingFilter(private val tracer: Tracer) : GlobalFilter, Ordered {
         )
 
         return chain.filter(mutatedExchange)
-            .doOnSuccess { response ->
+            .doOnSuccess { 
                 val endTime = System.currentTimeMillis()
                 val duration = endTime - startTime
+                val statusCode = exchange.response.statusCode
 
                 logger.info(
                     "Gateway Response - TraceId: {}, SpanId: {}, CorrelationId: {}, Status: {}, Duration: {}ms, Timestamp: {}",
                     traceId ?: "N/A",
                     spanId ?: "N/A",
                     correlationId,
-                    response.statusCode,
+                    statusCode,
                     duration,
                     LocalDateTime.now()
                 )

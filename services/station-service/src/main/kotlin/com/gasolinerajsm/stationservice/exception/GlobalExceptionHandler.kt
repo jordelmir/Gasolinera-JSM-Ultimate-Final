@@ -1,7 +1,7 @@
 package com.gasolinerajsm.stationservice.exception
 
-import io.micrometer.core.instrument.MeterRegistry // New import
-import jakarta.servlet.http.HttpServletRequest // New import
+import io.micrometer.core.instrument.MeterRegistry
+import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

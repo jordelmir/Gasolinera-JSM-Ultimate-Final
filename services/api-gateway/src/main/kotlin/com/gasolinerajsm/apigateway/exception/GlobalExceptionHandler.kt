@@ -1,11 +1,13 @@
 package com.gasolinerajsm.apigateway.exception
 
+import io.micrometer.core.instrument.MeterRegistry
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
-import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.server.ServerWebExchange
 import java.time.LocalDateTime
 
 data class ErrorResponse(
@@ -13,16 +15,12 @@ data class ErrorResponse(
     val status: Int,
     val error: String,
     val message: String,
-    val path: String, // Make path non-nullable
-    val method: String // Add method
+    val path: String,
+    val method: String
 )
 
-import io.micrometer.core.instrument.MeterRegistry // Import MeterRegistry
-
-@ControllerAdvice
-class GlobalExceptionHandler(
-    private val meterRegistry: MeterRegistry // Inject MeterRegistry
-) {
+@RestControllerAdvice
+class GlobalExceptionHandler(private val meterRegistry: MeterRegistry) {
 
     private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
@@ -34,7 +32,7 @@ class GlobalExceptionHandler(
             .filterNotNull()
             .joinToString("; ")
         val path = exchange.request.path.value()
-        val method = exchange.request.method?.name() ?: "UNKNOWN"
+        val method = exchange.request.method.name()
         logger.warn("Validation error: {} for path {} {}", errors, method, path)
         val errorResponse = ErrorResponse(
             timestamp = LocalDateTime.now(),
@@ -51,7 +49,7 @@ class GlobalExceptionHandler(
     fun handleIllegalArgumentException(ex: IllegalArgumentException, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
         meterRegistry.counter("http_requests_errors_total", "status", "400", "exception", "IllegalArgumentException").increment()
         val path = exchange.request.path.value()
-        val method = exchange.request.method?.name() ?: "UNKNOWN"
+        val method = exchange.request.method.name()
         logger.warn("Illegal argument: {} for path {} {}", ex.message, method, path)
         val errorResponse = ErrorResponse(
             timestamp = LocalDateTime.now(),
@@ -68,7 +66,7 @@ class GlobalExceptionHandler(
     fun handleGenericException(ex: Exception, exchange: ServerWebExchange): ResponseEntity<ErrorResponse> {
         meterRegistry.counter("http_requests_errors_total", "status", "500", "exception", ex.javaClass.simpleName).increment()
         val path = exchange.request.path.value()
-        val method = exchange.request.method?.name() ?: "UNKNOWN"
+        val method = exchange.request.method.name()
         logger.error("An unexpected error occurred: {} for path {} {}", ex.message, method, path, ex)
         val errorResponse = ErrorResponse(
             timestamp = LocalDateTime.now(),
